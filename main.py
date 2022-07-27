@@ -5,9 +5,7 @@ import plotly.figure_factory as ff
 import plotly.express as px
 from datetime import datetime
 from datetime import timedelta
-import os
-print("DIRECTORIO DE TRABAJO")
-print(os.getcwd())
+import plotly.graph_objects as go
 
 st.set_page_config(layout = "wide")
 chart_data = pd.DataFrame(
@@ -29,6 +27,10 @@ st.subheader('By José Robles')
 aggregation_type = st.sidebar.selectbox('Select aggregation level', ['cuisine_type','item_type'])
 variable_type = st.sidebar.selectbox('Select variable', ['requested_orders','accepted_orders', 'completed_orders_ofo_state','total_eater_spend', 
 'first_time_orders', 'returning_orders'])
+
+#operation_type = st.sidebar.selectbox('Select operation', ['sum','mean', 'count'])
+operation_type = "sum"
+
 
 #range_time = st.sidebar.slider(
 #     "When do you start?",
@@ -57,55 +59,137 @@ item_or_cuisine_type = st.sidebar.multiselect(label_item_or_cuisine,item_or_cuis
 #time_type = st.sidebar.selectbox("Period:",["By time of day", "By day of week"])
 
 
+bear=df_final_long[["date", aggregation_type, variable_type]].groupby(["date", aggregation_type]).sum().reset_index(drop=False).groupby('date').apply(lambda x: x.nlargest(10, variable_type)).reset_index(drop=True)  
+bear2=df_final_long[["datetime", aggregation_type, variable_type]].groupby(["datetime", aggregation_type]).sum().reset_index(drop=False).groupby('datetime').apply(lambda x: x.nlargest(10, variable_type)).reset_index(drop=True) 
+
+#with col5:
+#    st.write(bear)
+
+#with col6:
+#    st.write(bear2)
+
+
+
 col1, col2 = st.columns(2)
+#col3, col4 = st.columns(2)
 with st.container():
     if aggregation_type == "cuisine_type":
         #by_time = df_final_long.query("datetime > @range_time[0] & datetime< @range_time[1]")[["datetime","cuisine_type",variable_type]]
-        by_time = df_final_long[["datetime","cuisine_type",variable_type]]
-        by_time = df_final_long.groupby(["datetime", "cuisine_type"]).sum().reset_index(drop=False)
-        fig = px.line(by_time.query("cuisine_type in @item_or_cuisine_type"), x="datetime",y=variable_type, color="cuisine_type")
-        col1.plotly_chart(fig,use_container_width = True)
-
+        #by_time = df_final_long[["datetime","cuisine_type",variable_type]]
+        #by_time = df_final_long.groupby(["datetime", "cuisine_type"]).sum().reset_index(drop=False)
+        #fig = px.line(by_time.query("cuisine_type in @item_or_cuisine_type"), x="datetime",y=variable_type, color="cuisine_type")
+        #col1.plotly_chart(fig,use_container_width = True)
+        
+        with col1:
+            st.text("")
+            st.text("")
+            st.text("")
+            st.text("Showing top 10 " + aggregation_type + " by date")
+            st.text("")
+            st.write(bear)
+            
         by_day = df_final_long[["date","cuisine_type",variable_type]]
-        by_day = df_final_long.groupby(["date", "cuisine_type"]).sum().reset_index(drop=False)
+        by_day = df_final_long.groupby(["date", "cuisine_type"]).agg(operation_type).reset_index(drop=False)
         fig = px.line(by_day.query("cuisine_type in @item_or_cuisine_type"), x="date",y=variable_type, color="cuisine_type")
         col2.plotly_chart(fig,use_container_width = True)
     else:
-        by_time = df_final_long[["datetime","item_type",variable_type]]
-        by_time = df_final_long.groupby(["datetime", "item_type"]).sum().reset_index(drop=False)
-        fig = px.line(by_time.query("item_type in @item_or_cuisine_type"), x="datetime",y=variable_type, color="item_type")
-        col1.plotly_chart(fig,use_container_width = True)
+        #by_time = df_final_long[["datetime","item_type",variable_type]]
+        #by_time = df_final_long.groupby(["datetime", "item_type"]).agg(operation_type).reset_index(drop=False)
+        #fig = px.line(by_time.query("item_type in @item_or_cuisine_type"), x="datetime",y=variable_type, color="item_type")
+        #col1.plotly_chart(fig,use_container_width = True)
+
+        with col1:
+            st.text("")
+            st.text("")
+            st.text("")
+            st.text("Showing top 10 " + aggregation_type + " by date")
+            st.text("")
+            st.write(bear)
 
         by_day = df_final_long[["date","item_type",variable_type]]
-        by_day = df_final_long.groupby(["date", "item_type"]).sum().reset_index(drop=False)
+        by_day = df_final_long.groupby(["date", "item_type"]).agg(operation_type).reset_index(drop=False)
         fig = px.line(by_day.query("item_type in @item_or_cuisine_type"), x="date",y=variable_type, color="item_type")
         col2.plotly_chart(fig,use_container_width = True)
+
+col3, col4 = st.columns(2)      
+with st.container():
+    if aggregation_type == "cuisine_type":
+        #by_time = df_final_long.query("datetime > @range_time[0] & datetime< @range_time[1]")[["datetime","cuisine_type",variable_type]]
         
+        with col3:
+            st.text("")
+            st.text("")
+            st.text("")
+            st.text("Showing top 10 " + aggregation_type + " by time of the day")
+            st.text("")
+            st.write(bear2)
         
-col3, col4 = st.columns(2)
+        by_time = df_final_long[["datetime","cuisine_type",variable_type]]
+        by_time = df_final_long.groupby(["datetime", "cuisine_type"]).sum().reset_index(drop=False)
+        fig = px.line(by_time.query("cuisine_type in @item_or_cuisine_type"), x="datetime",y=variable_type, color="cuisine_type")
+        col4.plotly_chart(fig,use_container_width = True)
+
+        #by_day = df_final_long[["date","cuisine_type",variable_type]]
+        #by_day = df_final_long.groupby(["date", "cuisine_type"]).agg(operation_type).reset_index(drop=False)
+        #fig = px.line(by_day.query("cuisine_type in @item_or_cuisine_type"), x="date",y=variable_type, color="cuisine_type")
+        #col2.plotly_chart(fig,use_container_width = True)
+    else:
+    
+        with col3:
+            st.text("")
+            st.text("")
+            st.text("")
+            st.text("Showing top 10 " + aggregation_type + " by time of the day")
+            st.text("")
+            st.write(bear2)    
+    
+        by_time = df_final_long[["datetime","item_type",variable_type]]
+        by_time = df_final_long.groupby(["datetime", "item_type"]).agg(operation_type).reset_index(drop=False)
+        fig = px.line(by_time.query("item_type in @item_or_cuisine_type"), x="datetime",y=variable_type, color="item_type")
+        col4.plotly_chart(fig,use_container_width = True)
+
+        #by_day = df_final_long[["date","item_type",variable_type]]
+        #by_day = df_final_long.groupby(["date", "item_type"]).agg(operation_type).reset_index(drop=False)
+        #fig = px.line(by_day.query("item_type in @item_or_cuisine_type"), x="date",y=variable_type, color="item_type")
+        #col2.plotly_chart(fig,use_container_width = True)
+
+        
+col5, col6 = st.columns(2)
 with st.container():
     if aggregation_type == "cuisine_type":
         by_time = df_final_long[["datetime","cuisine_type",variable_type]]
-        by_time = df_final_long.groupby(["datetime", "cuisine_type"]).sum().reset_index(drop=False)   
-        by_time2 = df_final_long.groupby(["cuisine_type"]).sum().reset_index(drop=False)
+        by_time = df_final_long.groupby(["datetime", "cuisine_type"]).agg(operation_type).reset_index(drop=False)   
+        by_time2 = df_final_long.groupby(["cuisine_type"]).agg(operation_type).reset_index(drop=False)
+        
+        #by_day = df_final_long[["date","cuisine_type",variable_type]]
+        #by_day = df_final_long.groupby(["date", "cuisine_type"]).agg(operation_type).reset_index(drop=False)   
+        #by_day2 = df_final_long.groupby(["cuisine_type"]).agg(operation_type).reset_index(drop=False)
         
         fig = px.bar(by_time2, y=variable_type, x='cuisine_type', text_auto='.2s')#, title="Default: various text sizes, positions and angles")
-        col3.plotly_chart(fig,use_container_width = True)
+        col5.plotly_chart(fig,use_container_width = True)
 
         fig = px.pie(by_day.query("cuisine_type in @item_or_cuisine_type"), names="cuisine_type",values=variable_type)
-        col4.plotly_chart(fig,use_container_width = True)
+        #fig = px.bar(by_day2, y=variable_type, x='cuisine_type', text_auto='.2s')
+        col6.plotly_chart(fig,use_container_width = True)
     else:
         by_time = df_final_long[["datetime","item_type",variable_type]]
-        by_time = df_final_long.groupby(["datetime", "item_type"]).sum().reset_index(drop=False)   
-        by_time2 = df_final_long.groupby(["item_type"]).sum().reset_index(drop=False)
+        by_time = df_final_long.groupby(["datetime", "item_type"]).agg(operation_type).reset_index(drop=False)   
+        by_time2 = df_final_long.groupby(["item_type"]).agg(operation_type).reset_index(drop=False)
+        
+        #by_day = df_final_long[["date","item_type",variable_type]]
+        #by_day = df_final_long.groupby(["date", "item_type"]).agg(operation_type).reset_index(drop=False)   
+        #by_day2 = df_final_long.groupby(["item_type"]).agg(operation_type).reset_index(drop=False)
         
         fig = px.bar(by_time2, y=variable_type, x='item_type', text_auto='.2s')#, title="Default: various text sizes, positions and angles")
-        col3.plotly_chart(fig,use_container_width = True)
+        col5.plotly_chart(fig,use_container_width = True)
 
         fig = px.pie(by_day.query("item_type in @item_or_cuisine_type"), names="item_type",values=variable_type)
-        col4.plotly_chart(fig,use_container_width = True)
+        #fig = px.bar(by_day2, y=variable_type, x='item_type', text_auto='.2s')
+        col6.plotly_chart(fig,use_container_width = True)
 
-        
+
+
+
 #if variable_type == 'requested_orders':
 #    print("ok")
 #    col1, col2 = st.columns(2)
