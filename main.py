@@ -5,6 +5,9 @@ import plotly.figure_factory as ff
 import plotly.express as px
 from datetime import datetime
 from datetime import timedelta
+import os
+print("DIRECTORIO DE TRABAJO")
+print(os.getcwd())
 
 st.set_page_config(layout = "wide")
 chart_data = pd.DataFrame(
