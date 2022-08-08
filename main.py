@@ -446,3 +446,8 @@ with tab_kpi:
     col16.text("")
     col16.text("")
     col16.plotly_chart(fig2,use_container_width = True)     
+
+    by_day = df_final_long[["date","cuisine_type","requested_orders"]]
+    by_day = df_final_long.groupby(["date", "cuisine_type"]).agg("sum").reset_index(drop=False)
+    fig = px.pie(by_day, names="cuisine_type",values="requested_orders", title="Overall participation")
+    st.plotly_chart(fig, use_container_width=False)
