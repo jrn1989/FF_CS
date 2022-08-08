@@ -1,2 +1,2 @@
 plotly==5.9.0
-
+millify=0.1.1
